@@ -1,0 +1,48 @@
+# Test Case Specification: Утка-подлодка «Кряква»
+
+Версия: 0.1 (к SPEC.md v0.1)
+
+Эталонный аппарат (если не сказано иное): `DuckSubmarine("Кряква", mass_kg=80, ballast_capacity_l=200, max_speed_kmh=10, air=100)`. Порог погружения 100 л, цистерны пусты, аппарат на поверхности.
+
+Соотношение: 25 модульных / 6 сценарных ≈ 81 / 19.
+
+## Модульные тесты (module, AAA)
+
+| ID | Тип | Источник | Предусловие | Вход | Ожидание | Приоритет |
+|---|---|---|---|---|---|---|
+| TC-01 | module | SPEC 3.0, 3.2, 3.3 | — | name=" Кряква ", mass_kg=80, ballast_capacity_l=200, max_speed_kmh=10, air=100 (все числа как int); отдельно: air не передан | name=" Кряква " (без обрезки); числовые атрибуты равны входу и имеют тип float; air=100.0 (и по умолчанию); position_km=0.0; ballast_l=0.0; dive_threshold_l=100.0; is_submerged=False; hull_intact=True; can_dive=False | high |
+| TC-02 | module | SPEC 3.0, 3.2, 5 | — | name="" ; name="   " ; mass_kg, ballast_capacity_l, max_speed_kmh = 0, -1, nan, inf, -inf ; air=-0.1, 100.1, nan, inf, -inf ; air=0, air=100 | name, размеры и воздух вне диапазона → ValueError; air=0 и air=100 → объект создан | high |
+| TC-03 | module | SPEC 3.0, 3.2, 5 | — | name=123 ; name=None ; mass_kg="80" ; mass_kg=True ; ballast_capacity_l=None ; max_speed_kmh=[10] ; air="50" ; air=True ; air=None ; name="" вместе с mass_kg="80" | TypeError; в последнем случае TypeError, а не ValueError (типы раньше значений) | medium |
+| TC-04 | module | SPEC 3.3 | эталон | присвоение любого публичного атрибута (name, mass_kg, ballast_capacity_l, max_speed_kmh, air, position_km, is_submerged, hull_intact, ballast_l, dive_threshold_l, can_dive) | AttributeError | medium |
+| TC-05 | module | SPEC 3.4.1 | эталон | move(5, "surface") | вернул 0.5; air=95; position_km=5; is_submerged=False | high |
+| TC-06 | module | SPEC 3.4.1 | эталон; flood_tanks(120) | move(5, "underwater"), затем move(2, "surface") | после нырка: вернул 1.0; air=80; position_km=5; is_submerged=True. После всплытия: вернул 0.2; air=78; position_km=7; is_submerged=False | high |
+| TC-07 | module | SPEC 3.4.1 | а) эталон; б) flood_tanks(120), move(1, "underwater") (под водой) | move(1, "ground") | DuckCannotWaddle в обоих случаях; состояние не изменилось | high |
+| TC-08 | module | SPEC 3.0, 3.4.1, 5 | эталон | move(0, "surface") ; (-5, "surface") ; (nan, "surface") ; (inf, "surface") ; (-inf, "surface") ; (1, "space") ; (1, "") ; ("10", "surface") ; (True, "surface") ; (None, "surface") ; ([1], "surface") ; (1, 1) ; (1, None) | первые семь → ValueError; остальные → TypeError; состояние не изменилось | high |
+| TC-09 | module | SPEC 3.0, 3.4.1, 5 | а) air=10; б) air=10, flood_tanks(120); в) air=100; г) air=100, flood_tanks(100) | а) move(20, "surface"); б) move(3, "underwater"); в) move(100, "surface"); г) move(25, "underwater") | а) DuckOutOfAir, required=20, available=10; б) DuckOutOfAir, required=12, available=10; в) вернул 10.0; air=0.0; position_km=100; г) вернул 5.0; air=0.0; is_submerged=True. При ошибках состояние не изменилось | high |
+| TC-10 | module | SPEC 2, 3.3, 3.4.1, 5 | а) цистерны пусты; б) flood_tanks(99.9); в) flood_tanks(100) | move(1, "underwater") | а), б) can_dive=False; DuckTooBuoyant; состояние не изменилось; в) can_dive=True; погружение успешно, is_submerged=True | high |
+| TC-11 | module | SPEC 2, 3.3, 3.4.1 | flood_tanks(150); breach_hull() | move(1, "underwater") ; затем move(1, "surface") | can_dive=False; DuckHullBreached, состояние не изменилось; по поверхности идёт: вернул 0.1; air=99; is_submerged=False | high |
+| TC-12 | module | SPEC 3.0, 6.3 | несколько нарушений одновременно | см. колонку «Ожидание» | пробоина + пустые цистерны, underwater → DuckHullBreached; пустые цистерны + air=0, underwater → DuckTooBuoyant; пробоина + air=0 (цистерны 150), underwater → DuckHullBreached; ground + air=0 → DuckCannotWaddle; move(0, "ground") → ValueError; move("1", "space") → TypeError; air=0, move(1, "surface") → DuckOutOfAir | medium |
+| TC-13 | module | SPEC 3.4.3 | эталон; отдельно air=10; отдельно пробитый корпус | calculate_air(10, "surface") ; (10, "underwater") ; (1000, "underwater") при air=10 ; (10, "underwater") при пробитом корпусе ; (1, "ground") ; (0, "surface") ; (nan, "surface") ; (1, "space") ; ("1", "surface") ; (True, "surface") ; (1, 1) | 10 ; 40 ; 4000 без исключения ; 40 без исключения ; DuckCannotWaddle ; ValueError ; ValueError ; ValueError ; TypeError ; TypeError ; TypeError; состояние не изменилось | high |
+| TC-14 | module | SPEC 3.4.2 | 6 состояний: на поверхности, цистерны пусты; на поверхности, цистерны 150 л; под водой; с пробоиной; под водой, air=0; на поверхности, цистерны ровно 100 л | can_overcome("net" / "shallows" / "reef") | пусты: F / T / T; 150 л: F / F / T; под водой: T / F / T; пробоина: F / T / F; под водой, air=0: T / F / T; ровно 100 л: F / F / T; воздух и позиция не изменились | high |
+| TC-15 | module | SPEC 3.4.2 | эталон | can_overcome("mountain") ; ("") ; (42) ; (None) | ValueError ; ValueError ; TypeError ; TypeError; состояние не изменилось | medium |
+| TC-16 | module | SPEC 3.4.4, 3.0, 5 | air=20 ; air=50 ; air=100 ; для ошибок air=50 | refill_air(50) ; refill_air(1000) ; refill_air(0.5) ; refill_air(0) ; (-5) ; (nan) ; (inf) ; ("10") ; (True) ; (None) | 70 ; 100 ; 100 ; метод возвращает None ; ValueError ×4 ; TypeError ×3; air=50 | high |
+| TC-17 | module | SPEC 3.4.5, 3.0, 5 | эталон | flood_tanks(120), затем (50), затем (1000); для ошибок: (0) ; (-1) ; (nan) ; (inf) ; ("5") ; (True) ; (None) | ballast_l: 120 ; 170 ; 200 (не больше ёмкости); возвращает None; air=100; is_submerged=False; ошибки: ValueError ×4, TypeError ×3, состояние не изменилось | high |
+| TC-18 | module | SPEC 3.4.6, 5 | а) flood_tanks(150); б) flood_tanks(120); в) цистерны пусты, air=0 | а) blow_tanks(50); б) blow_tanks(1000); в) blow_tanks(10) | а) ballast_l=100; air=87.5; возвращает None; б) ballast_l=0; air=70 (расход по фактически удалённым 120 л); в) без исключения, состояние не изменилось | high |
+| TC-19 | module | SPEC 2, 3.4.6, 5 | flood_tanks(120); move(1, "underwater") (air=96, под водой) | blow_tanks(20), затем blow_tanks(1) | после первого: ballast_l=100 (ровно порог); air=91; is_submerged=True. После второго: ballast_l=99; air=90.75; is_submerged=False; position_km=1 | high |
+| TC-20 | module | SPEC 3.0, 3.4.6 | а) flood_tanks(150); б) air=5, flood_tanks(150) | а) blow_tanks(0) ; (-1) ; (nan) ; (inf) ; ("5") ; (True) ; (None); б) blow_tanks(50) | а) ValueError ×4; TypeError ×3; состояние не изменилось; б) DuckOutOfAir, required=12.5, available=5; ballast_l=150, air=5 | medium |
+| TC-21 | module | SPEC 3.4.7, 3.0 | а) эталон; б) flood_tanks(120), move(1, "underwater"); в) пробитый корпус; г) air=3; д) эталон; е) air=4 | а) quack(3); б) quack(2); в) quack(1); г) quack(3); д) quack(0) ; (-1) ; (2.5) ; (True) ; ("3") ; (None); е) quack(5) | а) air=97; возвращает None; position_km=0; б) air=94; is_submerged=True; в) air=99; hull_intact=False; г) air=0; д) ValueError ×2; TypeError ×4; air=100; е) DuckOutOfAir, required=5, available=4; air=4 | high |
+| TC-22 | module | SPEC 3.4.8 | flood_tanks(150); move(5, "underwater") (air=80); отдельно: аппарат на поверхности | breach_hull() дважды | hull_intact=False; is_submerged=False; can_dive=False; air=80; ballast_l=150; position_km=5; второй вызов без ошибок; на поверхности: hull_intact=False, is_submerged=False, air=100 | high |
+| TC-23 | module | SPEC 3.4.9 | а) пробит корпус, flood_tanks(150); б) пробит корпус, цистерны пусты; в) air=0, flood_tanks(150), пробит корпус; г) корпус цел, flood_tanks(150) | patch_hull() | а) hull_intact=True; is_submerged=False; can_dive=True; б) hull_intact=True; can_dive=False; в) hull_intact=True; can_dive=False; г) без ошибок, состояние не изменилось | high |
+| TC-24 | module | SPEC 3.4.10 | flood_tanks(120); move(5, "underwater") | get_status(), затем изменить словарь | ключи ровно {name, air, position_km, is_submerged, hull_intact, ballast_l, can_dive}; значения "Кряква", 80, 5, True, True, 120, True; изменение словаря не меняет объект | medium |
+| TC-25 | module | SPEC 6.1 | — | issubclass(...); DuckOutOfAir(6, 2); DuckOutOfAir(required=7, available=3) | 4 доменных ⊂ DuckError ⊂ CrazyVehicleError ⊂ Exception; DuckOutOfAir имеет required/available (позиционно и по имени) | medium |
+
+## Сценарные тесты (scenario, GWT)
+
+| ID | Тип | Источник | Вход | Ожидание | Приоритет |
+|---|---|---|---|---|---|
+| TC-26 | scenario | SPEC 4.2, сц. 5 | все шаги «Доставка кувшинок» | position_km=35; air=17; is_submerged=True; промежуточный DuckOutOfAir(80, 67) | high |
+| TC-27 | scenario | SPEC 4.2, сц. 6 | все шаги «Щука-диверсант» | position_km=15; air=58; is_submerged=True; hull_intact=True; промежуточный DuckHullBreached | high |
+| TC-28 | scenario | SPEC 4.2, сц. 7 | все шаги «Аварийное всплытие» | position_km=6; air=21; ballast_l=100; is_submerged=True; промежуточный DuckTooBuoyant | high |
+| TC-29 | scenario | SPEC 4.2, сц. 8 | все шаги «Утка на берегу» | position_km=30; air=100; is_submerged=False; три DuckCannotWaddle; промежуточный DuckOutOfAir(1, 0) | medium |
+| TC-30 | scenario | SPEC 4.2, сц. 9 | все шаги «Последний пузырёк» | position_km=31; air=1; ballast_l=150; is_submerged=True; промежуточные DuckOutOfAir(0.5, 0), (1, 0), (5, 0) | medium |
+| TC-31 | scenario | SPEC 4.2, сц. 10 | все шаги «Ровно на пороге» | position_km=6; air=3.5; ballast_l=50; is_submerged=True; hull_intact=True; промежуточные DuckTooBuoyant, DuckOutOfAir(4, 1.5) | medium |

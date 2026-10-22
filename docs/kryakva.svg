@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480" role="img" aria-label="Утка-подлодка «Кряква»">
+  <title>Утка-подлодка «Кряква»</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfeaff"/>
+      <stop offset="1" stop-color="#eef8ff"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5bb8e8"/>
+      <stop offset="1" stop-color="#0b3d6b"/>
+    </linearGradient>
+    <linearGradient id="duck" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe45c"/>
+      <stop offset="1" stop-color="#f5b81c"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="480" fill="url(#sky)"/>
+  <rect y="190" width="800" height="290" fill="url(#water)"/>
+  <path d="M0 190 Q50 178 100 190 T200 190 T300 190 T400 190 T500 190 T600 190 T700 190 T800 190" fill="none" stroke="#e8f6ff" stroke-width="4" opacity="0.9"/>
+
+  <!-- перископ-клюв над водой -->
+  <g>
+    <rect x="598" y="128" width="12" height="70" fill="#7a8794"/>
+    <rect x="596" y="118" width="40" height="14" rx="4" fill="#5d6a77"/>
+    <circle cx="634" cy="125" r="6" fill="#bfe3ff" stroke="#3b4652" stroke-width="2"/>
+  </g>
+
+  <!-- корпус-утка -->
+  <g>
+    <ellipse cx="400" cy="305" rx="230" ry="95" fill="url(#duck)" stroke="#c98a00" stroke-width="4"/>
+    <!-- голова -->
+    <circle cx="590" cy="250" r="62" fill="url(#duck)" stroke="#c98a00" stroke-width="4"/>
+    <!-- клюв -->
+    <path d="M640 255 Q700 250 706 272 Q690 290 640 280 Z" fill="#ff8a1f" stroke="#c25f00" stroke-width="3"/>
+    <!-- глаз -->
+    <circle cx="607" cy="236" r="9" fill="#1b1b1b"/>
+    <circle cx="610" cy="233" r="3" fill="#ffffff"/>
+    <!-- хвост -->
+    <path d="M178 290 Q140 250 160 220 Q200 240 210 275 Z" fill="#f5b81c" stroke="#c98a00" stroke-width="4"/>
+    <!-- иллюминатор -->
+    <circle cx="400" cy="300" r="34" fill="#bfe3ff" stroke="#6b7480" stroke-width="8"/>
+    <circle cx="390" cy="290" r="9" fill="#ffffff" opacity="0.7"/>
+    <!-- крыло -->
+    <path d="M300 330 Q360 380 450 345 Q420 320 360 318 Q320 320 300 330 Z" fill="#f2a900" stroke="#c98a00" stroke-width="3"/>
+  </g>
+
+  <!-- балластные цистерны -->
+  <g>
+    <rect x="290" y="372" width="64" height="26" rx="13" fill="#6b7480" stroke="#3b4652" stroke-width="3"/>
+    <rect x="446" y="372" width="64" height="26" rx="13" fill="#6b7480" stroke="#3b4652" stroke-width="3"/>
+    <text x="322" y="415" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#e8f6ff">балласт</text>
+    <text x="478" y="415" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#e8f6ff">балласт</text>
+  </g>
+
+  <!-- винт -->
+  <g>
+    <circle cx="165" cy="330" r="14" fill="#6b7480" stroke="#3b4652" stroke-width="3"/>
+    <path d="M165 330 L135 300 M165 330 L195 360 M165 330 L195 300 M165 330 L135 360" stroke="#3b4652" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- пузырьки -->
+  <g fill="none" stroke="#e8f6ff" stroke-width="2.5" opacity="0.85">
+    <circle cx="105" cy="300" r="9"/>
+    <circle cx="80" cy="262" r="6"/>
+    <circle cx="115" cy="228" r="4"/>
+    <circle cx="640" cy="330" r="7"/>
+    <circle cx="668" cy="300" r="5"/>
+  </g>
+
+  <text x="400" y="460" font-family="Arial, sans-serif" font-size="26" font-weight="bold" text-anchor="middle" fill="#e8f6ff">«Кряква»</text>
+</svg>
