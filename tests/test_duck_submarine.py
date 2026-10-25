@@ -434,6 +434,9 @@ class TestCalculateAir(unittest.TestCase):
         self.assertAlmostEqual(breached.calculate_air(10, "underwater"), 40.0,
                                places=PLACES)
 
+        # Проверка переполнения
+        self.assertEqual(duck.calculate_air(1e308, "underwater"), INF)
+
         with self.assertRaises(DuckCannotWaddle):
             duck.calculate_air(1, "ground")
         for args in ((0, "surface"), (NAN, "surface"), (INF, "surface"), (-INF, "surface"), (1, "space")):
@@ -611,6 +614,18 @@ class TestTanks(unittest.TestCase):
             duck.blow_tanks(10)
             self.assertEqual(snapshot(duck), before)
 
+        with self.subTest(case="ровно весь воздух"):
+            duck = make_duck(air=10)
+            duck.flood_tanks(120)
+            duck.move(1, "underwater")
+            # Осталось 6 воздуха (10 - 1 * 4)
+            result = duck.blow_tanks(24) # 24 * 0.25 = 6
+            self.assertIsNone(result)
+            self.assertAlmostEqual(duck.air, 0.0, places=PLACES)
+            self.assertAlmostEqual(duck.ballast_l, 96.0, places=PLACES)
+            self.assertIs(duck.is_submerged, False)
+            self.assertAlmostEqual(duck.position_km, 1.0, places=PLACES)
+
     def test_tc19_blow_tanks_surfacing_rule(self):
         """TC-19. Продув ниже порога под водой — всплытие; ровно на пороге — остаётся."""
         # Arrange
@@ -785,6 +800,16 @@ class TestHull(unittest.TestCase):
             duck.flood_tanks(150)
             before = snapshot(duck)
             duck.patch_hull()
+            self.assertEqual(snapshot(duck), before)
+
+        with self.subTest(case="целый корпус под водой"):
+            duck = make_duck()
+            duck.flood_tanks(120)
+            duck.move(1, "underwater") # Теперь утка под водой
+            before = snapshot(duck)
+            duck.patch_hull()
+            self.assertIs(duck.hull_intact, True)
+            self.assertIs(duck.is_submerged, True) # Она осталась под водой!
             self.assertEqual(snapshot(duck), before)
 
 
