@@ -436,7 +436,7 @@ class TestCalculateAir(unittest.TestCase):
 
         with self.assertRaises(DuckCannotWaddle):
             duck.calculate_air(1, "ground")
-        for args in ((0, "surface"), (NAN, "surface"), (1, "space")):
+        for args in ((0, "surface"), (NAN, "surface"), (INF, "surface"), (-INF, "surface"), (1, "space")):
             with self.subTest(args=args):
                 with self.assertRaises(ValueError):
                     duck.calculate_air(*args)
@@ -542,7 +542,7 @@ class TestRefillAir(unittest.TestCase):
 
         # Arrange
         duck = make_duck(air=50)
-        for amount in (0, -5, NAN, INF):
+        for amount in (0, -5, NAN, INF, -INF):
             with self.subTest(amount=amount):
                 with self.assertRaises(ValueError):
                     duck.refill_air(amount)
@@ -573,7 +573,7 @@ class TestTanks(unittest.TestCase):
 
         fresh = make_duck()
         before = snapshot(fresh)
-        for liters in (0, -1, NAN, INF):
+        for liters in (0, -1, NAN, INF, -INF):
             with self.subTest(liters=liters):
                 with self.assertRaises(ValueError):
                     fresh.flood_tanks(liters)
@@ -643,7 +643,7 @@ class TestTanks(unittest.TestCase):
         before = snapshot(duck)
 
         # Act / Assert
-        for liters in (0, -1, NAN, INF):
+        for liters in (0, -1, NAN, INF, -INF):
             with self.subTest(liters=liters):
                 with self.assertRaises(ValueError):
                     duck.blow_tanks(liters)

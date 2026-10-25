@@ -13,5 +13,11 @@
 - Regression-тест: <TC-ID, имя метода>
 ```
 
+## [0.1.1] — 2026-10-25
+- Что изменено: SPEC 1, 3.3, 5; TCS TC-13, TC-16, TC-17, TC-20; tests/ добавлены `-inf` в тесты на ошибки.
+- Почему: замечания ревьюера C (C-1, C-2, C-3) в RESPONSES.md.
+- Классификация: ТЗ / тест.
+- Regression-тест: TC-13, TC-16, TC-17, TC-20.
+
 ## [0.1] — до заморозки
 - Первая версия SPEC.md, TEST_CASES.md (TC-01…TC-31) и tests/test_duck_submarine.py.
